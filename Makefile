@@ -23,7 +23,7 @@ build: ## Build the containers
 	$(DOCKER_COMPOSE) down --remove-orphans 2>/dev/null || true
 	$(DOCKER_COMPOSE) up -d --build
 
-install: build wait-db db-restore composer-install ## Full setup: build, wait for DB, restore SQL, then install composer (production)
+install: build wait-db composer-install ## Full setup: build, wait for DB, then install composer (use make db-restore manually once)
 	docker exec cleartoo-app mkdir -p /var/www/resources/views /var/www/storage/framework/cache /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/logs
 	docker exec cleartoo-app chown -R www-data:www-data /var/www
 	docker exec cleartoo-app chmod -R 777 /var/www/storage /var/www/bootstrap/cache
