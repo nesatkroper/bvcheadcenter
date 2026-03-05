@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: cleartoo
-      MYSQL_ROOT_PASSWORD: Root_Secure_2026
+      MYSQL_ROOT_PASSWORD: Aa32c2PFMzcwDd2r
       MYSQL_USER: cleartoo
       MYSQL_PASSWORD: Aa32c2PFMzcwDd2r
     volumes:
@@ -38,7 +38,7 @@ services:
           "mysqladmin",
           "ping",
           "-uroot",
-          "-pRoot_Secure_2026",
+          "-pAa32c2PFMzcwDd2r",
           "--silent",
         ]
       interval: 5s

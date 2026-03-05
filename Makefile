@@ -2,7 +2,7 @@
 
 CONTAINER_NAME=cleartoo-app
 DB_CONTAINER=cleartoo-db
-DB_ROOT_PASS=Root_Secure_2026
+DB_ROOT_PASS=Aa32c2PFMzcwDd2r
 
 # Auto-detect compose command (V2 plugin vs V1 standalone)
 DOCKER_COMPOSE := $(shell docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
