@@ -1,6 +1,7 @@
 # Makefile for Laravel Docker setup
 
 CONTAINER_NAME=cleartoo-app
+DB_CONTAINER=cleartoo-db
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -18,11 +19,23 @@ build: ## Build the containers
 	docker-compose down --remove-orphans 2>/dev/null || true
 	docker-compose up -d --build
 
-install: build ## Initial setup: build, install composer dependencies, and generate key
-	docker exec -it $(CONTAINER_NAME) composer install
+install: build wait-db db-restore composer-install ## Full setup: build, wait for DB, restore SQL, then install composer
 	docker exec -it $(CONTAINER_NAME) php artisan key:generate --ansi
 	docker exec -it $(CONTAINER_NAME) php artisan storage:link
+	docker exec -it $(CONTAINER_NAME) php artisan optimize:clear
 	@echo "Setup complete! Navigate to http://cleartoo.site:8080"
+
+wait-db: ## Wait for MySQL to be ready
+	@echo "Waiting for MySQL to be ready..."
+	@until docker exec $(DB_CONTAINER) mysql -uroot -p1234 -e "SELECT 1" > /dev/null 2>&1; do \
+		sleep 2; \
+	done
+	@echo "MySQL is ready!"
+
+db-restore: ## Restore the database from bvcheadcenter_db.sql
+	@echo "Restoring database from bvcheadcenter_db.sql..."
+	docker exec -i $(DB_CONTAINER) mysql -uroot -p1234 bvcheadcenter_db < bvcheadcenter_db.sql
+	@echo "Database restoration complete!"
 
 composer-install: ## Run composer install inside the container
 	docker exec -it $(CONTAINER_NAME) composer install
@@ -30,11 +43,14 @@ composer-install: ## Run composer install inside the container
 bash: ## Access the app container bash
 	docker exec -it $(CONTAINER_NAME) bash
 
+db-bash: ## Access the database container bash
+	docker exec -it $(DB_CONTAINER) bash
+
 logs: ## Show container logs
 	docker-compose logs -f
 
 migrate: ## Run database migrations
-	docker exec -it $(CONTAINER_NAME) php artisan migrate
+	docker exec -it $(CONTAINER_NAME) php artisan migrate --force
 
 seed: ## Run database seeds
 	docker exec -it $(CONTAINER_NAME) php artisan db:seed

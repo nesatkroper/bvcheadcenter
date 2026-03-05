@@ -17,9 +17,26 @@ services:
       - .:/var/www
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      - db
+    networks:
+      - cleartoo-network
+
+  db:
+    image: mysql:5.7
+    container_name: cleartoo-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bvcheadcenter_db
+      MYSQL_ROOT_PASSWORD: 1234
+    volumes:
+      - db-data:/var/lib/mysql
     networks:
       - cleartoo-network
 
 networks:
   cleartoo-network:
     driver: bridge
+
+volumes:
+  db-data:
