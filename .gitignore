@@ -23,6 +23,11 @@ user.secrets
 /storage/framework/testing/*
 /storage/framework/views/*
 /storage/logs/*
+/bootstrap/cache/*.php
+/bootstrap/cache/packages.php
+/bootstrap/cache/services.php
+/bootstrap/cache/config.php
+/bootstrap/cache/routes.php
 
 # --- Databases ---
 /*.sqlite

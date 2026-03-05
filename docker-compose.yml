@@ -28,7 +28,7 @@ services:
       MYSQL_DATABASE: cleartoo
       MYSQL_ROOT_PASSWORD: Root_Secure_2026
       MYSQL_USER: cleartoo
-      MYSQL_PASSWORD: BvcApp_Secure_2026
+      MYSQL_PASSWORD: Aa32c2PFMzcwDd2r
     volumes:
       - db-data:/var/lib/mysql
     healthcheck:
