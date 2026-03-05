@@ -63,6 +63,11 @@ composer-dev: ## Run composer install with dev dependencies (for local developme
 bash: ## Access the app container bash
 	docker exec -it $(CONTAINER_NAME) bash
 
+db-fix-slugs: ## Repair missing shop names and slugs in the database
+	@echo "Repairing missing shop names and slugs..."
+	docker exec $(DB_CONTAINER) mysql -uroot -p$(DB_ROOT_PASS) cleartoo -e "UPDATE shops SET name = 'Shop' WHERE name IS NULL; UPDATE shops SET slug = CONCAT('shop-', id) WHERE slug IS NULL OR slug = '';"
+	@echo "Repair complete!"
+
 db-bash: ## Access the database container bash
 	docker exec -it $(DB_CONTAINER) bash
 
