@@ -66,6 +66,9 @@ bash: ## Access the app container bash
 db-bash: ## Access the database container bash
 	docker exec -it $(DB_CONTAINER) bash
 
+db-sql: ## Access the MySQL prompt directly
+	docker exec -it $(DB_CONTAINER) mysql -u cleartoo -pAa32c2PFMzcwDd2r cleartoo
+
 logs: ## Show container logs
 	$(DOCKER_COMPOSE) logs -f
 
