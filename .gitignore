@@ -38,3 +38,5 @@ user.secrets
 .idea/
 .vscode/
 *.swp
+
+storage/debugbar
