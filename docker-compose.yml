@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cleartoo-app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - APP_NAME=Cleartoo
+      - APP_ENV=local
+      - APP_KEY=base64:WrvqXJ+ilWOLItqI7C2N2R2dQkqFAHFYzTrQBBJqtso=
+    volumes:
+      - .:/var/www
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - cleartoo-network
+
+networks:
+  cleartoo-network:
+    driver: bridge

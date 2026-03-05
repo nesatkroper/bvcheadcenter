@@ -1,0 +1,40 @@
+# --- System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Environment & Keys ---
+.env
+.env.backup
+.env.production
+# Do not ignore .env.example
+user.secrets
+
+# --- Dependencies ---
+/vendor
+/node_modules
+
+# --- Laravel Build & Logs ---
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+
+# --- Databases ---
+/*.sqlite
+/*.sqlite-journal
+
+# --- Testing & Tools ---
+.phpunit.result.cache
+.phpunit.cache
+/tests/TestCase.php.bak
+.php-cs-fixer.cache
+
+# --- IDEs ---
+.idea/
+.vscode/
+*.swp
