@@ -44,10 +44,15 @@ wait-db: ## Wait for MySQL to be ready (uses healthcheck)
 	done
 	@echo "MySQL is ready!"
 
-db-restore: ## Restore the database from cleartoo.sql
+db-restore: ## Restore the database from bvcheadcenter_db.sql
 	@echo "Restoring database from bvcheadcenter_db.sql..."
 	docker exec -i $(DB_CONTAINER) mysql -uroot -p$(DB_ROOT_PASS) cleartoo < bvcheadcenter_db.sql
 	@echo "Database restoration complete!"
+
+db-backup: ## Create a backup of the live database
+	@echo "Backing up database..."
+	docker exec $(DB_CONTAINER) mysqldump -uroot -p$(DB_ROOT_PASS) cleartoo > backup_$(shell date +%Y_%m_%d_%H%M%S).sql
+	@echo "Backup saved as backup_$(shell date +%Y_%m_%d_%H%M%S).sql"
 
 composer-install: ## Run composer install (production: no-dev + optimized autoloader)
 	docker exec $(CONTAINER_NAME) composer install --no-dev --optimize-autoloader --no-interaction
