@@ -21,9 +21,8 @@ build: ## Build the containers
 	docker-compose up -d --build
 
 install: build wait-db db-restore composer-install ## Full setup: build, wait for DB, restore SQL, then install composer (production)
-	docker exec -it $(CONTAINER_NAME) php artisan key:generate --ansi
-	docker exec -it $(CONTAINER_NAME) php artisan storage:link
-	docker exec -it $(CONTAINER_NAME) php artisan optimize:clear
+	docker exec cleartoo-app php artisan storage:link --force 2>/dev/null || true
+	docker exec cleartoo-app php artisan optimize:clear
 	@echo "Setup complete! Navigate to http://cleartoo.site:8080"
 
 fresh: ## Tear down everything including volumes and reinstall from scratch
@@ -39,15 +38,15 @@ wait-db: ## Wait for MySQL to be ready (uses healthcheck)
 	@echo "MySQL is ready!"
 
 db-restore: ## Restore the database from cleartoo.sql
-	@echo "Restoring database from cleartoo.sql..."
-	docker exec -i $(DB_CONTAINER) mysql -uroot -p$(DB_ROOT_PASS) cleartoo < cleartoo.sql
+	@echo "Restoring database from bvcheadcenter_db.sql..."
+	docker exec -i $(DB_CONTAINER) mysql -uroot -p$(DB_ROOT_PASS) cleartoo < bvcheadcenter_db.sql
 	@echo "Database restoration complete!"
 
 composer-install: ## Run composer install (production: no-dev + optimized autoloader)
-	docker exec -it $(CONTAINER_NAME) composer install --no-dev --optimize-autoloader --no-interaction
+	docker exec $(CONTAINER_NAME) composer install --no-dev --optimize-autoloader --no-interaction
 
 composer-dev: ## Run composer install with dev dependencies (for local development)
-	docker exec -it $(CONTAINER_NAME) composer install --optimize-autoloader
+	docker exec $(CONTAINER_NAME) composer install --optimize-autoloader
 
 bash: ## Access the app container bash
 	docker exec -it $(CONTAINER_NAME) bash
@@ -59,13 +58,13 @@ logs: ## Show container logs
 	docker-compose logs -f
 
 migrate: ## Run database migrations (only for new migrations after SQL restore)
-	docker exec -it $(CONTAINER_NAME) php artisan migrate --force
+	docker exec $(CONTAINER_NAME) php artisan migrate --force
 
 seed: ## Run database seeds
-	docker exec -it $(CONTAINER_NAME) php artisan db:seed
+	docker exec $(CONTAINER_NAME) php artisan db:seed
 
 clear: ## Clear Laravel cache
-	docker exec -it $(CONTAINER_NAME) php artisan optimize:clear
+	docker exec $(CONTAINER_NAME) php artisan optimize:clear
 
 cache: ## Cache config, routes and views for production
 	docker exec -it $(CONTAINER_NAME) php artisan config:cache
