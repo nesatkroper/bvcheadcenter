@@ -8,7 +8,7 @@ services:
     container_name: cleartoo-app
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "80:80"
     env_file:
       - .env
     volumes:
