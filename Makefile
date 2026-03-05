@@ -4,31 +4,24 @@ CONTAINER_NAME=cleartoo-app
 DB_CONTAINER=cleartoo-db
 DB_ROOT_PASS=Root_Secure_2026
 
+# Auto-detect compose command (V2 plugin vs V1 standalone)
+DOCKER_COMPOSE := $(shell docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 up: ## Start the containers in background
-	docker compose up -d
+	$(DOCKER_COMPOSE) up -d
 
 down: ## Stop the containers
-	docker compose down
+	$(DOCKER_COMPOSE) down
 
 restart: down up ## Restart the containers
 
-build: check-env ## Build the containers
+build: ## Build the containers
 	-docker ps -a --filter "name=$(CONTAINER_NAME)" --format "{{.ID}}" | xargs -r docker rm -f
-	docker compose down --remove-orphans 2>/dev/null || true
-	docker compose up -d --build
-
-check-env: ## Check that .env file exists
-	@if [ ! -f .env ]; then \
-		echo ""; \
-		echo "  ERROR: .env file not found!"; \
-		echo "  Create it from the example: cp .env.example .env"; \
-		echo "  Then edit .env with your production values."; \
-		echo ""; \
-		exit 1; \
-	fi
+	$(DOCKER_COMPOSE) down --remove-orphans 2>/dev/null || true
+	$(DOCKER_COMPOSE) up -d --build
 
 install: build wait-db db-restore composer-install ## Full setup: build, wait for DB, restore SQL, then install composer (production)
 	docker exec cleartoo-app php artisan storage:link --force 2>/dev/null || true
@@ -36,7 +29,7 @@ install: build wait-db db-restore composer-install ## Full setup: build, wait fo
 	@echo "Setup complete! Navigate to http://cleartoo.site:8080"
 
 fresh: ## Tear down everything including volumes and reinstall from scratch
-	docker compose down --volumes --remove-orphans 2>/dev/null || true
+	$(DOCKER_COMPOSE) down --volumes --remove-orphans 2>/dev/null || true
 	-docker ps -a --filter "name=$(CONTAINER_NAME)" --format "{{.ID}}" | xargs -r docker rm -f
 	@$(MAKE) install
 
@@ -65,7 +58,7 @@ db-bash: ## Access the database container bash
 	docker exec -it $(DB_CONTAINER) bash
 
 logs: ## Show container logs
-	docker compose logs -f
+	$(DOCKER_COMPOSE) logs -f
 
 migrate: ## Run database migrations (only for new migrations after SQL restore)
 	docker exec $(CONTAINER_NAME) php artisan migrate --force
