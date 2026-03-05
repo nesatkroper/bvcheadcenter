@@ -15,10 +15,20 @@ down: ## Stop the containers
 
 restart: down up ## Restart the containers
 
-build: ## Build the containers
+build: check-env ## Build the containers
 	-docker ps -a --filter "name=$(CONTAINER_NAME)" --format "{{.ID}}" | xargs -r docker rm -f
 	docker compose down --remove-orphans 2>/dev/null || true
 	docker compose up -d --build
+
+check-env: ## Check that .env file exists
+	@if [ ! -f .env ]; then \
+		echo ""; \
+		echo "  ERROR: .env file not found!"; \
+		echo "  Create it from the example: cp .env.example .env"; \
+		echo "  Then edit .env with your production values."; \
+		echo ""; \
+		exit 1; \
+	fi
 
 install: build wait-db db-restore composer-install ## Full setup: build, wait for DB, restore SQL, then install composer (production)
 	docker exec cleartoo-app php artisan storage:link --force 2>/dev/null || true
