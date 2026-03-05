@@ -45,4 +45,4 @@ user.secrets
 .vscode/
 *.swp
 
-storage/debugbar
+storage/debugbar.env
