@@ -7,6 +7,26 @@ DB_ROOT_PASS=Aa32c2PFMzcwDd2r
 # Auto-detect compose command (V2 plugin vs V1 standalone)
 DOCKER_COMPOSE := $(shell docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
 
+backup: db-backup backup-files ## Backup everything (DB and Uploads)
+
+restore: db-restore restore-files ## Restore everything (DB and Uploads)
+
+backup-files: ## Create a backup of the 'public/uploads' folder
+	@echo "Backing up uploads..."
+	@FILENAME=uploads_backup_$(shell date +%Y_%m_%d_%H%M%S).tar.gz; \
+	docker exec $(CONTAINER_NAME) tar -czf - public/uploads > $$FILENAME; \
+	echo "Uploads backup saved as $$FILENAME"
+
+restore-files: ## Restore the 'public/uploads' folder (usage: make restore-files FILE=filename.tar.gz)
+	@if [ -z "$(FILE)" ]; then \
+		echo "Error: Please specify the backup file, e.g., make restore-files FILE=uploads_backup_xxx.tar.gz"; \
+		exit 1; \
+	fi
+	@echo "Restoring uploads from $(FILE)..."
+	cat $(FILE) | docker exec -i $(CONTAINER_NAME) tar -xzf - -C /var/www
+	docker exec $(CONTAINER_NAME) chown -R www-data:www-data /var/www/public/uploads
+	@echo "Uploads restoration complete!"
+
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
