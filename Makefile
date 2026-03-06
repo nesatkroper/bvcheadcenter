@@ -43,14 +43,21 @@ build: ## Build the containers
 	$(DOCKER_COMPOSE) down --remove-orphans 2>/dev/null || true
 	$(DOCKER_COMPOSE) up -d --build
 
-install: build wait-db composer-install ## Full setup: build, wait for DB, then install composer (use make db-restore manually once)
-	docker exec cleartoo-app mkdir -p /var/www/resources/views /var/www/storage/framework/cache/data /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/logs
-	docker exec cleartoo-app chown -R www-data:www-data /var/www
-	docker exec cleartoo-app chmod -R 777 /var/www/storage /var/www/bootstrap/cache
-	docker exec cleartoo-app rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/packages.php bootstrap/cache/services.php
-	docker exec cleartoo-app php artisan storage:link --force 2>/dev/null || true
-	docker exec cleartoo-app php artisan optimize:clear
+install: up wait-db composer-install perm ## Full setup: start containers, wait for DB, install composer, and fix perms
+	docker exec $(CONTAINER_NAME) rm -f bootstrap/cache/config.php bootstrap/cache/routes.php bootstrap/cache/packages.php bootstrap/cache/services.php
+	docker exec $(CONTAINER_NAME) php artisan storage:link --force 2>/dev/null || true
+	docker exec $(CONTAINER_NAME) php artisan optimize:clear
 	@echo "Setup complete! Navigate to http://cleartoo.site"
+
+upd: ## Fast update: clear cache and fix permissions (for small code changes)
+	docker exec $(CONTAINER_NAME) php artisan optimize:clear
+	@$(MAKE) perm
+	@echo "Update complete!"
+
+perm: ## Fix folder permissions for Laravel
+	docker exec $(CONTAINER_NAME) mkdir -p resources/views storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs
+	docker exec $(CONTAINER_NAME) chown -R www-data:www-data storage bootstrap/cache
+	docker exec $(CONTAINER_NAME) chmod -R 775 storage bootstrap/cache
 
 fresh: ## Tear down everything including volumes and reinstall from scratch
 	$(DOCKER_COMPOSE) down --volumes --remove-orphans 2>/dev/null || true

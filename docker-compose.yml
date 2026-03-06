@@ -12,6 +12,7 @@ services:
     env_file:
       - .env
     volumes:
+      - .:/var/www
       - app-storage:/var/www/storage
       - app-bootstrap:/var/www/bootstrap/cache
       - app-uploads:/var/www/public/uploads
